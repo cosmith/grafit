@@ -1,0 +1,29 @@
+{
+    "manifest_version": 2,
+
+    "name": "Grafit",
+    "description": "Auto graphs !",
+    "version": "0.1",
+
+    "background": {
+        "scripts": ["background.js"],
+        "persistent": true
+    },
+
+    "content_scripts": [
+        {
+            "matches": ["http://*/*", "https://*/*"],
+            "js": ["content_script.js"],
+            "run_at" : "document_end"
+        }
+    ],
+
+    "permissions": [
+        "contextMenus"
+    ],
+
+    "icons": {
+        "16": "icon-16.png",
+        "48": "icon-48.png"
+    }
+}
