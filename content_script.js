@@ -1,21 +1,18 @@
+// This code is injected into every page
 (function () {
     'use strict';
     /*jslint browser: true */
     /*global chrome, console */
 
-
-    // This code is injected into every page
-
     var latestClick;
 
     document.onmousedown = function (evt) {
-        latestClick = evt.toElement.outerHTML;
+        latestClick = evt.target;
     };
 
     function getSource() {
         var message = {
             method: "returnSource",
-            pageSource: document.all[0].outerHTML,
             click: latestClick
         };
 
