@@ -1,24 +1,31 @@
-// This code is injected into every page
+(function () {
+    'use strict';
+    /*jslint browser: true */
+    /*global chrome, console */
 
-var latestClick;
 
-document.onmousedown = function(evt) {
-    latestClick = evt.toElement.outerHTML;
-};
+    // This code is injected into every page
 
-var getSource = function() {
-    var message = {
-        method: "returnSource",
-        pageSource: document.all[0].outerHTML,
-        click: latestClick
+    var latestClick;
+
+    document.onmousedown = function (evt) {
+        latestClick = evt.toElement.outerHTML;
     };
 
-    return message;
-};
+    function getSource() {
+        var message = {
+            method: "returnSource",
+            pageSource: document.all[0].outerHTML,
+            click: latestClick
+        };
 
-
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    if (request.method === "sendSource") {
-        sendResponse(getSource());
+        return message;
     }
-});
+
+
+    chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+        if (request.method === "sendSource") {
+            sendResponse(getSource());
+        }
+    });
+}());
