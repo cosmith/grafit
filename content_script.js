@@ -4,16 +4,30 @@
     /*jslint browser: true */
     /*global chrome, console */
 
-    var latestClick;
+    // Get the list of parents of the clicked element
+    function getParents(clicked) {
+        var el = clicked,
+            parents = [];
+
+        while (el.parentElement.nodeName !== 'BODY') {
+            el = el.parentElement;
+            parents.push(el.nodeName);
+        }
+        console.log(parents);
+        return parents;
+    }
+
+
+    var parents;
 
     document.onmousedown = function (evt) {
-        latestClick = evt.target;
+        parents = getParents(evt.target);
     };
 
     function getSource() {
         var message = {
             method: "returnSource",
-            click: latestClick
+            parents: parents
         };
 
         return message;

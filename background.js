@@ -4,62 +4,60 @@
     /*global chrome, console, alert */
 
 
-    // Get the list of parents of the clicked element
-    function getParents(clicked) {
-        var el = clicked,
-            parents = [];
-
-        while (el.parentElement !== null) {
-            el = el.parentElement;
-            parents.append(el);
-        }
-
-        return parents;
-    }
-
-
     // Get the source of the page
-    function fetchPage(url) {
-        // TODO: get the page source!
-        var pageSource = url;
-        return pageSource;
+    function fetchPage(url, parents) {
+        var xhr = new XMLHttpRequest(),
+            pageSource;
+        
+        xhr.open("GET", url, true);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4) {
+                pageSource = xhr.responseText;
+                console.log('Source retrieved!');
+                return getValue(pageSource, parents);
+            }
+        }
+        xhr.send();
     }
 
 
     // Get the value of our element from the source and the list of parents
     function getValue(pageSource, parents) {
-        var source = pageSource,
+        var source,
             value,
             i = 0,
             currentEl;
-
+        
+        // we inject our HTML in a div to be able to parse it
+        source = document.createElement('div');
+        source.innerHTML = pageSource;
+        console.log("Source", source);
+        
+        // go through every parent to find the new value of our element
         for (i = parents.length - 1; i >= 0; i -= 1) {
-            currentEl = parents[i].nodeName;
+            console.log("Source", source);
 
+            currentEl = parents[i];
             // TODO: get the actual thing
-            source = pageSource.getElementByTagName(currentEl)[0];
+            source = source.getElementsByTagName(currentEl)[0];
         }
 
         value = parseFloat(source);
+
+        console.log("Value", value);
+        console.log("Source", source);
         return value;
     }
 
 
     // Process the data we received from the page
-    function getSelectedTag(selectionText, pageUrl, clicked) {
-        var parents = [],
-            source,
-            value;
+    function getSelectedTag(selectionText, pageUrl, parents) {
+        var value;
 
         if (isNaN(parseFloat(selectionText))) {
             alert("You have to select a number!");
         } else {
-            parents = getParents(clicked);
-
-            source = fetchPage(pageUrl);
-            value = getValue(source, parents);
-
-            console.log(value);
+            value = fetchPage(pageUrl, parents);
         }
     }
 
@@ -71,7 +69,7 @@
                 tabs[0].id,
                 {method: "sendSource"},
                 function (response) {
-                    getSelectedTag(selectionText, pageUrl, response.click);
+                    getSelectedTag(selectionText, pageUrl, response.parents);
                 }
             );
         });

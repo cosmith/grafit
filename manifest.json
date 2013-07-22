@@ -19,7 +19,8 @@
     ],
 
     "permissions": [
-        "contextMenus"
+        "contextMenus",
+        "<all_urls>"
     ],
 
     "icons": {
