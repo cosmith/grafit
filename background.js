@@ -61,15 +61,21 @@
     }
 
 
+    var timer;
     // Ask the page to send us the info we need
     function sendRequest(selectionText, pageUrl) {
+        var onResponse = function (response) {
+            clearInterval(timer);
+            timer = setInterval(function() {
+                getSelectedTag(selectionText, pageUrl, response.parents);
+            }, 10 * 1000);
+        };
+
         chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
             chrome.tabs.sendMessage(
                 tabs[0].id,
                 {method: "sendSource"},
-                function (response) {
-                    getSelectedTag(selectionText, pageUrl, response.parents);
-                }
+                onResponse
             );
         });
     }
