@@ -42,7 +42,7 @@
         value = parseFloat(source.innerHTML.match(/\d+/g).join(''));
 
         console.log("Value", value);
-        // console.log("Source", source);
+        console.log("Source", source.innerHTML);
         return value;
     }
 
@@ -91,6 +91,14 @@
             console.info("Page URL: " + info.pageUrl);
 
             sendRequest(info.selectionText, info.pageUrl);
+            chrome.windows.create({
+                url: "popup.html",
+                type: "popup",
+                width: 300,
+                height: 200
+            }, function (window) {
+                console.log(window.id);
+            });
         }
     }
 
