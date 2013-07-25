@@ -41,7 +41,7 @@
             source = source.children[position];
         }
 
-        value = parseFloat(source.innerHTML.match("[0-9]*"));
+        value = parseFloat(source.innerHTML.match(/\d+/g).join(''));
 
         console.log("Value", value);
         console.log("Source", source);
