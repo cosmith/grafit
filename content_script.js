@@ -4,16 +4,33 @@
     /*jslint browser: true */
     /*global chrome, console */
 
-    // Get the list of parents of the clicked element
+    // Get the position of a element in the list of its siblings
+    function getElementPosition(element, siblings) {
+        var position = 0,
+            i = 0;
+
+        for (i = 0; i < siblings.length; i += 1) {
+            if (element === siblings[i]) {
+                position = i;
+                break;
+            }
+        }
+
+        return position;
+    }
+
+    // Get the list of parents and position of the clicked element
     function getParents(clicked) {
         var el = clicked,
-            parents = [];
+            parents = [],
+            position = 0;
 
-        while (el.parentElement.nodeName !== 'BODY') {
+        while (el.parentElement.nodeName !== 'HTML') {
+            position = getElementPosition(el, el.parentElement.children);
             el = el.parentElement;
-            parents.push(el.nodeName);
+            parents.push(position);
         }
-        console.log(parents);
+
         return parents;
     }
 

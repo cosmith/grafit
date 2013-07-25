@@ -8,7 +8,7 @@
     function fetchPage(url, parents) {
         var xhr = new XMLHttpRequest(),
             pageSource;
-        
+
         xhr.open("GET", url, true);
         xhr.onreadystatechange = function() {
             if (xhr.readyState == 4) {
@@ -16,7 +16,7 @@
                 console.log('Source retrieved!');
                 return getValue(pageSource, parents);
             }
-        }
+        };
         xhr.send();
     }
 
@@ -26,23 +26,22 @@
         var source,
             value,
             i = 0,
-            currentEl;
-        
-        // we inject our HTML in a div to be able to parse it
-        source = document.createElement('div');
-        source.innerHTML = pageSource;
-        console.log("Source", source);
-        
-        // go through every parent to find the new value of our element
-        for (i = parents.length - 1; i >= 0; i -= 1) {
-            console.log("Source", source);
+            position = 0;
 
-            currentEl = parents[i];
-            // TODO: get the actual thing
-            source = source.getElementsByTagName(currentEl)[0];
+        // We inject our HTML in a div to be able to parse it
+        source = document.createElement("root");
+        pageSource = pageSource.split(/(<body[^<]*>|<\/body>)/ig)[2];
+        source.innerHTML = pageSource;
+
+        // console.log(source);
+
+        // Traverse the node tree to find the new value of our element
+        for (i = parents.length - 1; i >= 0; i -= 1) {
+            position = parents[i];
+            source = source.children[position];
         }
 
-        value = parseFloat(source);
+        value = parseFloat(source.innerHTML.match("[0-9]*"));
 
         console.log("Value", value);
         console.log("Source", source);
