@@ -5,10 +5,10 @@
 
     var timer,
         popupWindowId,
-        INTERVAL = 10; // interval in seconds
+        INTERVAL = 5; // interval in seconds
 
     // Get the source of the page
-    function fetchPage(url, parents) {
+    function fetchPage(url, parents, callback) {
         var xhr = new XMLHttpRequest(),
             pageSource;
 
@@ -17,7 +17,7 @@
             if (xhr.readyState == 4) {
                 pageSource = xhr.responseText;
                 console.log("[fetchPage] Source retrieved!");
-                return getValue(pageSource, parents);
+                callback(pageSource, parents);
             }
         };
         xhr.send();
@@ -50,25 +50,34 @@
     }
 
 
-    // Process the data we received from the page
-    function onInterval(pageUrl, parents) {
-        var value = fetchPage(pageUrl, parents),
-            data = {
-                method: "sendData",
-                data: {
-                    date: new Date(Date.now()),
-                    val: value
-                }
-            };
+    function onPageFetched(source, parents) {
+        var value = getValue(source, parents),
+            data;
+
+        data = {
+            method: "sendData",
+            data: {
+                date: new Date(Date.now()),
+                val: value
+            }
+        };
 
         // Send data to the popup
         chrome.tabs.query({active: true, windowId: popupWindowId}, function (tabs) {
-            chrome.tabs.sendMessage(
-                tabs[0].id,
-                data,
-                null
-            );
+            try {
+                chrome.tabs.sendMessage(tabs[0].id, data, null);
+            } catch (e) {
+                // The popup is closed
+                clearInterval(timer);
+                console.log('[onInterval] Popup closed, removing timer');
+            }
         });
+    }
+
+
+    // Process the data we received from the page
+    function onInterval(pageUrl, parents) {
+        fetchPage(pageUrl, parents, onPageFetched);
     }
 
 

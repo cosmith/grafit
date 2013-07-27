@@ -6,14 +6,19 @@
 
     var data = [];
 
+    var margin = {top: 20, right: 20, bottom: 30, left: 50},
+        width = document.width - margin.left - margin.right - 20,
+        height = document.height - margin.top - margin.bottom - 20;
 
-    function createGraph() {
-        var margin = {top: 20, right: 20, bottom: 30, left: 50},
-            width = document.width - margin.left - margin.right - 20,
-            height = document.height - margin.top - margin.bottom - 20;
+    var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-        var parseDate = d3.time.format("%H:%M").parse;
+    var parseDate = d3.time.format.utc("%Y-%m-%dT%H:%M:%S.%LZ").parse;
 
+    function update() {
         var x = d3.time.scale()
             .range([0, width]);
 
@@ -32,11 +37,7 @@
             .x(function(d) { return x(d.date); })
             .y(function(d) { return y(d.val); });
 
-        var svg = d3.select("body").append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-          .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        var path = svg.selectAll("path").data(data);
 
         x.domain(d3.extent(data, function(d) { return d.date; }));
         y.domain(d3.extent(data, function(d) { return d.val; }));
@@ -50,8 +51,9 @@
             .attr("class", "y axis")
             .call(yAxis);
 
-        svg.append("path")
-            .datum(data)
+        path.enter()
+            .append("path")
+            .data([data])
             .attr("class", "line")
             .attr("d", line);
     }
@@ -59,10 +61,16 @@
 
     // Add listener to get the data
     chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-        console.log("[onMessage]", request);
         if (request.method === "sendData") {
-            data.push(request.data);
+            var toPush = request.data;
+            toPush.date = parseDate(request.data.date);
+
+            data.push(toPush);
+            update();
+
+            console.log("Data received:", toPush.date, toPush.val);
         }
     });
 
+    update();
 }());
