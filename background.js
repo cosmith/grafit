@@ -94,8 +94,8 @@
             chrome.windows.create({
                 url: "popup.html",
                 type: "popup",
-                width: 300,
-                height: 200
+                width: 500,
+                height: 300
             }, function (window) {
                 console.log(window.id);
             });
