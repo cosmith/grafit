@@ -61,9 +61,10 @@
                 }
             };
 
-        chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
+        // Send data to the popup
+        chrome.tabs.query({active: true, windowId: popupWindowId}, function (tabs) {
             chrome.tabs.sendMessage(
-                popupWindowId,
+                tabs[0].id,
                 data,
                 null
             );
