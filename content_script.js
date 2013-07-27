@@ -4,6 +4,9 @@
     /*jslint browser: true */
     /*global chrome, console */
 
+    var parents;
+
+
     // Get the position of a element in the list of its siblings
     function getElementPosition(element, siblings) {
         var position = 0,
@@ -35,12 +38,13 @@
     }
 
 
-    var parents;
-
+    // Click handler
     document.onmousedown = function (evt) {
         parents = getParents(evt.target);
     };
 
+
+    // Return the list of node positions
     function getSource() {
         var message = {
             method: "returnSource",
@@ -51,6 +55,7 @@
     }
 
 
+    // Add listener to send the data when requested
     chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         if (request.method === "sendSource") {
             sendResponse(getSource());

@@ -3,6 +3,9 @@
     /*jslint browser: true */
     /*global chrome, console, alert */
 
+    var timer,
+        popupWindowId,
+        INTERVAL = 10; // interval in seconds
 
     // Get the source of the page
     function fetchPage(url, parents) {
@@ -13,7 +16,7 @@
         xhr.onreadystatechange = function() {
             if (xhr.readyState == 4) {
                 pageSource = xhr.responseText;
-                console.log('Source retrieved!');
+                console.log("[fetchPage] Source retrieved!");
                 return getValue(pageSource, parents);
             }
         };
@@ -41,64 +44,82 @@
         // Parse the element to find our value
         value = parseFloat(source.innerHTML.match(/\d+/g).join(''));
 
-        console.log("Value", value);
-        console.log("Source", source.innerHTML);
+        console.log("[getValue ] Value:", value);
+        console.log("[getValue ] Source:", source.innerHTML);
         return value;
     }
 
 
     // Process the data we received from the page
-    function getSelectedTag(selectionText, pageUrl, parents) {
-        var value;
+    function onInterval(pageUrl, parents) {
+        var value = fetchPage(pageUrl, parents),
+            data = {
+                method: "sendData",
+                data: {
+                    date: new Date(Date.now()),
+                    val: value
+                }
+            };
 
-        if (isNaN(parseFloat(selectionText))) {
-            alert("You have to select a number!");
-        } else {
-            value = fetchPage(pageUrl, parents);
-        }
+        chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
+            chrome.tabs.sendMessage(
+                popupWindowId,
+                data,
+                null
+            );
+        });
     }
 
 
-    var timer;
-    // Ask the page to send us the info we need
-    function sendRequest(selectionText, pageUrl) {
-        var onResponse = function (response) {
-            getSelectedTag(selectionText, pageUrl, response.parents);
-            clearInterval(timer);
-            timer = setInterval(function() {
-                getSelectedTag(selectionText, pageUrl, response.parents);
-            }, 10 * 1000);
-        };
+    // When we receive the data from the page, setup the timer
+    function onResponse(pageUrl, response) {
+        onInterval(pageUrl, response.parents);
 
+        // Setup timer
+        clearInterval(timer);
+        timer = setInterval(function () {
+            onInterval(pageUrl, response.parents);
+        }, INTERVAL * 1000);
+    }
+
+
+    // Ask the page to send us the info we need
+    function sendRequest(pageUrl) {
         chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
             chrome.tabs.sendMessage(
                 tabs[0].id,
                 {method: "sendSource"},
-                onResponse
+                function (response) { onResponse(pageUrl, response); }
             );
+        });
+    }
+
+
+    // Create the popup
+    function createPopUp() {
+        chrome.windows.create({
+            url: "popup.html",
+            type: "popup",
+            width: 500,
+            height: 300
+        }, function (window) {
+            popupWindowId = window.id;
         });
     }
 
 
     // The onClicked callback function.
     function onClickHandler(info, tab) {
-        // console.log("item " + info.menuItemId + " was clicked");
-        // console.log("info: " + JSON.stringify(info));
-        // console.log("tab: " + JSON.stringify(tab));
-
         if (info.editable === false) {
-            console.info("User selected text: " + info.selectionText);
-            console.info("Page URL: " + info.pageUrl);
+            console.log("[ onClick ] User selected text: " + info.selectionText);
+            console.log("[ onClick ] Page URL: " + info.pageUrl);
 
-            sendRequest(info.selectionText, info.pageUrl);
-            chrome.windows.create({
-                url: "popup.html",
-                type: "popup",
-                width: 500,
-                height: 300
-            }, function (window) {
-                console.log(window.id);
-            });
+            if (isNaN(parseFloat(info.selectionText))) {
+                alert("You have to select a number!");
+            } else {
+                sendRequest(info.pageUrl);
+                createPopUp();
+            }
         }
     }
 
@@ -109,14 +130,14 @@
 
         // Set up context menu tree at install time.
         chrome.runtime.onInstalled.addListener(function () {
-            console.info("Installation...");
+            console.log("[  init   ] Installation...");
 
             chrome.contextMenus.create({
                 "title": "graph this !",
                 "contexts": ["selection"],
                 "id": "context_selection"
             });
-            console.info("Context menu item created");
+            console.info("[  init   ] Context menu item created");
         });
     }
 
