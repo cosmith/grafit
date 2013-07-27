@@ -5,7 +5,7 @@
 
     var timer,
         popupWindowId,
-        INTERVAL = 5; // interval in seconds
+        INTERVAL = 10; // interval in seconds
 
     // Get the source of the page
     function fetchPage(url, parents, callback) {
