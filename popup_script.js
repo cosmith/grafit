@@ -1,4 +1,5 @@
 // Based on http://bl.ocks.org/mbostock/3883245
+
 (function () {
     'use strict';
     /*jslint browser: true */
@@ -10,7 +11,7 @@
         width = document.width - margin.left - margin.right - 20,
         height = document.height - margin.top - margin.bottom - 20;
 
-    var svg = d3.select("body").append("svg")
+    var graph = d3.select("body").append("svg:svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
@@ -20,35 +21,31 @@
     var y = d3.scale.linear().range([height, 0]);
     
     var line = d3.svg.line().x(function (d) { return x(d.date); })
-                            .y(function (d) { return y(d.val); });
+                            .y(function (d) { return y(d.val); })
+                            .interpolate("basis");
 
     var xAxis = d3.svg.axis().scale(x).orient("bottom");
     var yAxis = d3.svg.axis().scale(y).orient("left");
 
-    svg.append("g")
+    var parseDate = d3.time.format.utc("%Y-%m-%dT%H:%M:%S.%LZ").parse;
+
+    // init graph
+    graph.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0," + height + ")")
         .call(xAxis);
 
-    svg.append("g")
+    graph.append("g")
         .attr("class", "y axis")
         .call(yAxis);
 
-    var parseDate = d3.time.format.utc("%Y-%m-%dT%H:%M:%S.%LZ").parse;
-
-    
+    graph.append("path").attr("id", "lineGraph").attr("d", line(data));
 
     function update() {
-        svg.selectAll("path").remove();
-        
-        svg.append("path")
-            .data([data])
-            .attr("class", "line")
-            .attr("d", line);
-
         // data join
-        var path = svg.selectAll("path").data([data]);
-
+        var path = graph.selectAll("#lineGraph")
+            .data([data])
+            .attr("d", line);
 
         // update existing
         path.attr("class", "line");
@@ -56,7 +53,7 @@
         // enter
         path.enter()
             .append("path")
-            .data([data])
+            .data(data)
             .attr("class", "line")
             .attr("d", line);
 
@@ -67,8 +64,26 @@
         x.domain(d3.extent(data, function (d) { return d.date; }));
         y.domain(d3.extent(data, function (d) { return d.val; }));
 
-        svg.selectAll(".y.axis").call(yAxis)
-        svg.selectAll(".x.axis").call(xAxis);
+        graph.selectAll(".y.axis").call(yAxis)
+        graph.selectAll(".x.axis").call(xAxis);
+    }
+
+
+    // Display a message while waiting for data
+    function displayWaiting() {
+        var waiting = graph.selectAll(".waiting");
+        if (data.length < 3 && waiting[0].length == 0) {
+            graph.append("text")
+                .attr("class", "waiting")
+                .attr("x", width/2)
+                .attr("y", height/2)
+                .text("Waiting for more data...");
+        } 
+
+        if (data.length >= 3 && waiting[0].length > 0) {
+            graph.selectAll(".waiting")
+                .remove();
+        }
     }
 
 
@@ -79,11 +94,13 @@
             toPush.date = parseDate(request.data.date);
 
             data.push(toPush);
+            displayWaiting();
             update();
 
             console.log("Data received:", toPush.date, toPush.val);
         }
     });
 
+    displayWaiting();
     update();
 }());
