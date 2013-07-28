@@ -41,7 +41,7 @@
 
     graph.append("path").attr("id", "lineGraph").attr("d", line(data));
 
-    function update() {
+    function update(transitionDelay) {
         // data join
         var path = graph.selectAll("#lineGraph")
             .data([data])
@@ -58,14 +58,25 @@
             .attr("d", line);
 
         // enter + update
-        path.attr("d", line);
+        path.transition()
+            .ease("linear")
+            .duration(transitionDelay)
+            .attr("d", line);
 
         // update axis
         x.domain(d3.extent(data, function (d) { return d.date; }));
         y.domain(d3.extent(data, function (d) { return d.val; }));
 
-        graph.selectAll(".y.axis").call(yAxis)
-        graph.selectAll(".x.axis").call(xAxis);
+        graph.selectAll(".y.axis")
+          .transition()
+            .ease("linear")
+            .duration(transitionDelay)
+            .call(yAxis)
+        graph.selectAll(".x.axis")
+          .transition()
+            .ease("linear")
+            .duration(transitionDelay)
+            .call(xAxis);
     }
 
 
@@ -75,7 +86,7 @@
         if (data.length < 3 && waiting[0].length == 0) {
             graph.append("text")
                 .attr("class", "waiting")
-                .attr("x", width/2)
+                .attr("x", width/2 - 50)
                 .attr("y", height/2)
                 .text("Waiting for more data...");
         } 
@@ -95,12 +106,12 @@
 
             data.push(toPush);
             displayWaiting();
-            update();
+            update(500);
 
             console.log("Data received:", toPush.date, toPush.val);
         }
     });
 
     displayWaiting();
-    update();
+    update(0);
 }());
