@@ -143,7 +143,7 @@
             console.log("[  init   ] Installation...");
 
             chrome.contextMenus.create({
-                "title": "graph this !",
+                "title": "Graph this!",
                 "contexts": ["selection"],
                 "id": "context_selection"
             });
