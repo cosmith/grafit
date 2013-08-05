@@ -11,7 +11,7 @@
         width = document.width - margin.left - margin.right - 20,
         height = document.height - margin.top - margin.bottom - 20;
 
-    var graph = d3.select("body").append("svg:svg")
+    var graph = d3.select("#graph").append("svg:svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
@@ -40,6 +40,7 @@
         .call(yAxis);
 
     graph.append("path").attr("id", "lineGraph").attr("d", line(data));
+
 
     function update(transitionDelay) {
         // data join
@@ -98,6 +99,27 @@
     }
 
 
+    // Options handling
+    function setupOptions() {
+        // add event listeners on dropdowns
+        document.getElementById("refreshRate")
+            .addEventListener('change', onRefreshRateChanged);
+    }
+
+    function onRefreshRateChanged(e) {
+        var selector = document.getElementById("refreshRate"),
+            refreshRate = parseInt(selector.options[selector.selectedIndex].value);
+        
+        // send the updated rate to the background
+        chrome.runtime.sendMessage({
+            "method": "sendOptions",
+            "options": {
+                "refreshRate": refreshRate
+            }
+        });
+    }
+
+
     // Add listener to get the data
     chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         if (request.method === "sendData") {
@@ -112,6 +134,7 @@
         }
     });
 
+    setupOptions();
     displayWaiting();
     update(0);
 }());

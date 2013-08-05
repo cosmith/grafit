@@ -5,7 +5,8 @@
 
     var timer,
         popupWindowId,
-        INTERVAL = 10; // interval in seconds
+        refreshRate = 10, // interval in seconds
+        pageInfo = {url: "", parents: ""};
 
     // Get the source of the page
     function fetchPage(url, parents, callback) {
@@ -76,20 +77,25 @@
 
 
     // Process the data we received from the page
-    function onInterval(pageUrl, parents) {
-        fetchPage(pageUrl, parents, onPageFetched);
+    function onInterval() {
+        fetchPage(pageInfo.url, pageInfo.parents, onPageFetched);
     }
 
 
     // When we receive the data from the page, setup the timer
-    function onResponse(pageUrl, response) {
-        onInterval(pageUrl, response.parents);
+    function onContentScriptResponse(response) {
+        pageInfo.parents = response.parents;
+        onInterval();
+        setupTimer();
+    }
 
-        // Setup timer
+
+    // Setup timer
+    function setupTimer() {
         clearInterval(timer);
         timer = setInterval(function () {
-            onInterval(pageUrl, response.parents);
-        }, INTERVAL * 1000);
+            onInterval();
+        }, refreshRate * 1000);
     }
 
 
@@ -99,7 +105,7 @@
             chrome.tabs.sendMessage(
                 tabs[0].id,
                 {method: "sendSource"},
-                function (response) { onResponse(pageUrl, response); }
+                onContentScriptResponse
             );
         });
     }
@@ -118,8 +124,8 @@
     }
 
 
-    // The onClicked callback function.
-    function onClickHandler(info, tab) {
+    // The onClicked callback function
+    function onMenuClickHandler(info, tab) {
         if (info.editable === false) {
             console.log("[ onClick ] User selected text: " + info.selectionText);
             console.log("[ onClick ] Page URL: " + info.pageUrl);
@@ -127,6 +133,7 @@
             if (isNaN(parseFloat(info.selectionText))) {
                 alert("You have to select a number!");
             } else {
+                pageInfo.url = info.pageUrl;
                 sendRequest(info.pageUrl);
                 createPopUp();
             }
@@ -134,9 +141,26 @@
     }
 
 
+    // Persist the options and apply the changes
+    function saveOptions(options) {
+        refreshRate = options.refreshRate;
+        localStorage.refreshRate = refreshRate;
+
+        setupTimer();
+    }
+
+
+    // Add listener to update the refresh rate when changed in the popup
+    chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+        if (request.method === "sendOptions") {
+            saveOptions(request.options);
+        }
+    });
+
+
     // Initialize the extension
     function init() {
-        chrome.contextMenus.onClicked.addListener(onClickHandler);
+        chrome.contextMenus.onClicked.addListener(onMenuClickHandler);
 
         // Set up context menu tree at install time.
         chrome.runtime.onInstalled.addListener(function () {
