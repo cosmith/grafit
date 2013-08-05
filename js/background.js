@@ -114,7 +114,7 @@
     // Create the popup
     function createPopUp() {
         chrome.windows.create({
-            url: "popup.html",
+            url: "../views/popup.html",
             type: "popup",
             width: 500,
             height: 300

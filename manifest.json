@@ -2,18 +2,18 @@
     "manifest_version": 2,
 
     "name": "Grafit",
-    "description": "Auto graphs !",
-    "version": "0.1",
+    "description": "Instant graphs",
+    "version": "0.2",
 
     "background": {
-        "scripts": ["background.js"],
+        "scripts": ["js/background.js"],
         "persistent": true
     },
 
     "content_scripts": [
         {
             "matches": ["http://*/*", "https://*/*"],
-            "js": ["content_script.js"],
+            "js": ["js/content_script.js"],
             "run_at" : "document_end"
         }
     ],
@@ -25,7 +25,7 @@
     ],
 
     "icons": {
-        "16": "icon-16.png",
-        "48": "icon-48.png"
+        "16": "img/icon-16.png",
+        "48": "img/icon-48.png"
     }
 }
