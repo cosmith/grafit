@@ -5,7 +5,8 @@
     /*jslint browser: true */
     /*global chrome, console, alert, d3 */
 
-    var data = [];
+    var data = [],
+        optionsVisible = true;
 
     var margin = {top: 20, right: 20, bottom: 30, left: 50},
         width = document.width - margin.left - margin.right - 20,
@@ -102,12 +103,12 @@
     // Options handling
     function setupOptions() {
         // add event listeners on dropdowns
-        document.getElementById("refreshRate")
-            .addEventListener('change', onRefreshRateChanged);
+        d3.select("#refreshRate")
+            .on('change', onRefreshRateChanged);
     }
 
     function onRefreshRateChanged(e) {
-        var selector = document.getElementById("refreshRate"),
+        var selector = d3.select("#refreshRate"),
             refreshRate = parseInt(selector.options[selector.selectedIndex].value);
         
         // send the updated rate to the background
@@ -117,6 +118,23 @@
                 "refreshRate": refreshRate
             }
         });
+    }
+
+
+    // Visual effects
+    d3.select("#options-button")
+        .on("click", onOptionsClick);
+
+    // Show/hide the options panel
+    function onOptionsClick() {
+        console.log("click!");
+        var val = optionsVisible ? 0 : -40;
+
+        d3.select("#options-panel")
+            .transition()
+            .style("top", val + "px");
+
+        optionsVisible = !optionsVisible;
     }
 
 

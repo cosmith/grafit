@@ -1,5 +1,27 @@
 body {
     font: 10px sans-serif;
+    overflow: hidden;
+}
+
+#options-panel {
+    position: absolute;
+    top: -40px;
+    left: 0px;
+
+    padding: 5px;
+    width: 100%;
+
+    background: #f3f3f3;
+}
+
+#options-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+#options-button a {
+    text-decoration: none;
 }
 
 .axis path,
