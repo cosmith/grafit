@@ -108,9 +108,15 @@
     }
 
     function onRefreshRateChanged(e) {
-        var selector = d3.select("#refreshRate"),
-            refreshRate = parseInt(selector.options[selector.selectedIndex].value);
-        
+        var refreshRate;
+
+        d3.selectAll("option")
+            .each(function (d, i) { 
+                if (this.selected) {
+                    refreshRate = this.value;
+                }
+            });
+
         // send the updated rate to the background
         chrome.runtime.sendMessage({
             "method": "sendOptions",
@@ -127,7 +133,6 @@
 
     // Show/hide the options panel
     function onOptionsClick() {
-        console.log("click!");
         var val = optionsVisible ? 0 : -40;
 
         d3.select("#options-panel")

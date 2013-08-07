@@ -25,6 +25,21 @@
     }
 
 
+    // Parse a string to get the value of our number
+    function parseFloatFromHtml(html) {
+        var value,
+            exp;
+
+        // Match the first group of numbers, delimited by letters
+        // Regex: one digit, followed by a group of any of: 
+        // digit, space, comma, dot, or e followed by a digit (for exponentiation)
+        exp = html.match(/\d[\d|\ |\,|\.|e\d]+/g)[0];
+        value = parseFloat(exp);
+
+        return value;
+    }
+
+
     // Get the value of our element from the source and the list of parents
     function getValue(pageSource, parents) {
         var source,
@@ -43,7 +58,7 @@
         }
 
         // Parse the element to find our value
-        value = parseFloat(source.innerHTML.match(/\d+/g).join(''));
+        value = parseFloatFromHtml(source.innerHTML);
 
         console.log("[getValue ] Value:", value);
         console.log("[getValue ] Source:", source.innerHTML);
