@@ -28,6 +28,10 @@
             parents = [],
             position = 0;
 
+        if (!el.parentElement) {
+            return [];
+        }
+
         while (el.parentElement.nodeName !== 'HTML') {
             position = getElementPosition(el, el.parentElement.children);
             el = el.parentElement;
