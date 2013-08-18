@@ -156,6 +156,7 @@
 
     // Add listener to get the data
     chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+        // values to plot
         if (request.method === "sendData") {
             var toPush = request.data;
             toPush.date = parseDate(request.data.date);
@@ -165,6 +166,16 @@
             update(500);
 
             console.log("Data received:", toPush.date, toPush.val);
+        }
+        // page url
+        else if (request.method === "sendPageInfo") {
+            var url = request.data.url;
+            try {
+                url = url.match(/\/\/([^\/]*)\//)[1]; // only keep the TLD
+                d3.select("title").text("Graph - " + url);
+            } catch (e) {
+                console.error("Couldn't parse URL for title.")
+            }
         }
     });
 

@@ -15,7 +15,7 @@
 
         xhr.open("GET", url, true);
         xhr.onreadystatechange = function() {
-            if (xhr.readyState == 4) {
+            if (xhr.readyState === 4) {
                 pageSource = xhr.responseText;
                 console.log("[fetchPage] Source retrieved!");
                 callback(pageSource, parents);
@@ -31,7 +31,7 @@
             exp;
 
         // Match the first group of numbers, delimited by letters
-        // Regex: one digit, followed by a group of any of: 
+        // Regex: one digit, followed by a group of any of:
         // digit, space, comma, dot, or e followed by a digit (for exponentiation)
         exp = html.match(/\d[\d|\ |\,|\.|e\d]+/g);
         if (exp.length > 0) {
@@ -73,23 +73,11 @@
             data;
 
         data = {
-            method: "sendData",
-            data: {
-                date: new Date(Date.now()),
-                val: value
-            }
+            date: new Date(Date.now()),
+            val: value
         };
 
-        // Send data to the popup
-        chrome.tabs.query({active: true, windowId: popupWindowId}, function (tabs) {
-            try {
-                chrome.tabs.sendMessage(tabs[0].id, data, null);
-            } catch (e) {
-                // The popup is closed
-                clearInterval(timer);
-                console.log('[onInterval] Popup closed, removing timer');
-            }
-        });
+        sendDataToPopup("sendData", data);
     }
 
 
@@ -137,9 +125,26 @@
             height: 300
         }, function (window) {
             popupWindowId = window.id;
+
+            // We send the page url to display it in the popup's title
+            sendDataToPopup("sendPageInfo", {url: pageInfo.url});
         });
     }
 
+
+    // Send data to the popup
+    function sendDataToPopup(requestMethod, data) {
+        var toSend = {"method": requestMethod, "data": data};
+        chrome.tabs.query({active: true, windowId: popupWindowId}, function (tabs) {
+            try {
+                chrome.tabs.sendMessage(tabs[0].id, toSend, null);
+            } catch (e) {
+                // The popup is closed
+                clearInterval(timer);
+                console.log('[onInterval] Popup closed, removing timer');
+            }
+        });
+    }
 
     // The onClicked callback function
     function onMenuClickHandler(info, tab) {
@@ -199,12 +204,12 @@
 
 
 // http://stackoverflow.com/a/9251106/938089
-/* 
- * DOMParser HTML extension 
- * 2012-02-02 
- * 
- * By Eli Grey, http://eligrey.com 
- * Public domain. 
+/*
+ * DOMParser HTML extension
+ * 2012-02-02
+ *
+ * By Eli Grey, http://eligrey.com
+ * Public domain.
  * NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
  */
 
@@ -216,9 +221,9 @@
     var DOMParser_proto = DOMParser.prototype,
         real_parseFromString = DOMParser_proto.parseFromString;
 
-    // Firefox/Opera/IE throw errors on unsupported types  
+    // Firefox/Opera/IE throw errors on unsupported types
     try {
-        // WebKit returns null on unsupported types  
+        // WebKit returns null on unsupported types
         if ((new DOMParser()).parseFromString("", "text/html")) {
             // text/html parsing is natively supported
             return;
