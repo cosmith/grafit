@@ -33,8 +33,10 @@
         // Match the first group of numbers, delimited by letters
         // Regex: one digit, followed by a group of any of: 
         // digit, space, comma, dot, or e followed by a digit (for exponentiation)
-        exp = html.match(/\d[\d|\ |\,|\.|e\d]+/g)[0];
-        value = parseFloat(exp);
+        exp = html.match(/\d[\d|\ |\,|\.|e\d]+/g);
+        if (exp.length > 0) {
+            value = parseFloat(exp[0]);
+        }
 
         return value;
     }
