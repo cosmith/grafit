@@ -20,7 +20,7 @@
 
     var x = d3.time.scale().range([0, width]);
     var y = d3.scale.linear().range([height, 0]);
-    
+
     var line = d3.svg.line().x(function (d) { return x(d.date); })
                             .y(function (d) { return y(d.val); })
                             .interpolate("basis");
@@ -40,10 +40,14 @@
         .attr("class", "y axis")
         .call(yAxis);
 
-    graph.append("path").attr("id", "lineGraph").attr("d", line(data));
+    graph.append("path")
+        .attr("id", "lineGraph")
+        .attr("d", line(data));
 
 
     function update(transitionDelay) {
+        var yExtent = [];
+
         // data join
         var path = graph.selectAll("#lineGraph")
             .data([data])
@@ -67,13 +71,20 @@
 
         // update axis
         x.domain(d3.extent(data, function (d) { return d.date; }));
-        y.domain(d3.extent(data, function (d) { return d.val; }));
+
+        yExtent = d3.extent(data, function (d) { return d.val; });
+        if (yExtent[0] === yExtent[1]) {
+            yExtent = [yExtent[0] - 1, yExtent[1] + 1];
+        }
+        y.domain(yExtent);
+
 
         graph.selectAll(".y.axis")
           .transition()
             .ease("linear")
             .duration(transitionDelay)
-            .call(yAxis)
+            .call(yAxis);
+
         graph.selectAll(".x.axis")
           .transition()
             .ease("linear")
@@ -91,7 +102,7 @@
                 .attr("x", width/2 - 50)
                 .attr("y", height/2)
                 .text("Waiting for more data...");
-        } 
+        }
 
         if (data.length >= 3 && waiting[0].length > 0) {
             graph.selectAll(".waiting")
@@ -111,7 +122,7 @@
         var refreshRate;
 
         d3.selectAll("option")
-            .each(function (d, i) { 
+            .each(function (d, i) {
                 if (this.selected) {
                     refreshRate = this.value;
                 }
