@@ -74,7 +74,7 @@
 
         yExtent = d3.extent(data, function (d) { return d.val; });
         if (yExtent[0] === yExtent[1]) {
-            yExtent = [yExtent[0] - 1, yExtent[1] + 1];
+            yExtent = [yExtent[0] * 0.9, yExtent[1] * 1.1];
         }
         y.domain(yExtent);
 
