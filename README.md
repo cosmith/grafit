@@ -16,11 +16,11 @@ Usage
 -----
 Everybody loves screenshots.
 
-![Right click on number](http://i.imgur.com/ikdhd7N.png)
+![Right click on number](http://i.imgur.com/hYeYy3W.png)
 
 Boom! Instant graph.
 
-![Here's your graph](http://i.imgur.com/mU7rZsT.png)
+![Here's your graph](http://i.imgur.com/Ae6M25n.png)
 
 
 
