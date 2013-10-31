@@ -1,5 +1,6 @@
 ![grafit logo](https://github.com/cosmith/grafit/blob/master/img/icon-48.png?raw=true) Grafit 
 =========================================================================================
+[![Code Climate](https://codeclimate.com/github/cosmith/grafit.png)](https://codeclimate.com/github/cosmith/grafit)
 
 Grafit is a Chrome extension that lets you graph things on any webpage.
 
